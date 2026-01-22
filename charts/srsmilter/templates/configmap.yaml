@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: srs-milter-config
+  namespace: {{ .Release.Namespace }}
+data:
+  srs-milter.yml: |
+    srsDomain: {{ .Values.srsmilter.srsDomain }}
+
+    srsKeys:
+    {{- range .Values.srsmilter.srsKeys }}
+      - '{{ . }}'
+    {{- end }}
+
+    # All domains we consider local (i.e. we do not forward but deliver locally)
+    # You can use IDN domain names. They will be normalized to their ASCII representation automatically.
+    localDomains:
+    {{- range .Values.srsmilter.localDomains }}
+      - '{{ . }}'
+    {{- end }}
+
+    logLevel: {{ .Values.srsmilter.logLevel }}
+
+    # Public IPv4 and IPv6 addresses of the MTA
+    # If the MTA is on another host or does not have public IPs (e.g. it is firewalled) you need
+    # to specify this list.
+    # If you leave this list empty we will try to determine the public IPs automatically.
+    localIps:
+    {{- range .Values.srsmilter.localIps }}
+      - '{{ . }}'
+    {{- end }}

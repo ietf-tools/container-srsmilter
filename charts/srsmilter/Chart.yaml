@@ -1,0 +1,8 @@
+apiVersion: v2
+description: IETF srsmilter deployment for kubernetes
+name: srsmilter
+type: application
+version: 0.0.1
+appVersion: "0.0.1"
+maintainers:
+  - name: Dane Foster

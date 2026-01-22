@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -e
+
+log() {
+  echo "entrypoint: $1"
+}
+
+configure_srsmilter() {
+  log "creating srs-milter config"
+
+  mkdir -p /etc/srs-milter
+  cat << END >> /etc/srs-milter/srs-milter.yml
+  # Required: The domain we use to generate SRS addresses
+  srsDomain: 'dmarc.me.com'
+
+  # Required: List of secrets for SRS address generation and validation
+  # The first key gets used for SRS address generation. All other keys
+  # are only used for SRS address validation.
+  # You can use multiple keys for key rotation.
+  #srsKeys:
+  #  - active-key
+  #  - rotated-key
+  srsKeys: ['NEQ9abm0TUfidpKC1TpcMQC0vfX06mo6reAUBMAdNROEkHSdTVrG6Yh5wCk1xt5a']
+
+  # All domains we consider local (i.e. we do not forward but deliver locally)
+  # You can use IDN domain names. They will be normalized to their ASCII representation automatically.
+  localDomains:
+    - 'me.com'
+  #  - 'you.com'
+
+  # Adjust the logging verbosity with logLevel. A logLevel of 0 (the default) only logs critical errors.
+  # 1 also logs normal errors. 2 also warnings. 3 informational messages and 4 also includes debug messages.
+  logLevel: 4
+
+  # Public IPv4 and IPv6 addresses of the MTA
+  # If the MTA is on another host or does not have public IPs (e.g. it is firewalled) you need
+  # to specify this list.
+  # If you leave this list empty we will try to determine the public IPs automatically.
+  localIps:
+    - '127.0.0.1'
+
+  # Optional: You can specify a MySQL connection/query to lookup mail forwarding replacements
+  #dbDriver: 'mysql'
+  #dbDSN: 'user:password@tcp(host:port)/dbname'
+  #dbForwardQuery: "SELECT destination from mail_forwarding WHERE source = ? AND active = 'y' AND server_id = 1;"
+
+END
+}
+
+if [ ! -f "/etc/srs-milter/srs-milter.yml" ]; then
+  configure_srsmilter
+fi
+
+exec "$@"
